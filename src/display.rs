@@ -46,7 +46,7 @@ impl Camera {
     }
 
     pub fn view(&self, ctx: &mut BTerm, map: &mut Map) {
-        'chunk: for chunk_coord in IterOverChunks::from(self) {
+        for chunk_coord in IterOverChunks::from(self) {
             // get access to the chunk or create it
             // creation to be handled somewhere else
             let chunk = match map.chunks.get(&chunk_coord) {

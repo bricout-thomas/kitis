@@ -1,7 +1,6 @@
 use bevy_math::IVec2;
 use bracket_terminal::prelude::*;
 use bevy_ecs::prelude::*;
-use rand;
 
 use crate::{display::Camera, map::Map};
 

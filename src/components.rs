@@ -1,7 +1,6 @@
 use bevy_ecs::prelude::*;
 use bevy_math::*;
 use bracket_terminal::prelude::*;
-use bracket_color::prelude::*;
 
 #[derive(Component)]
 pub struct Position {
@@ -18,6 +17,5 @@ pub struct TileRenderable {
 impl TileRenderable {
     pub fn render(&self, x: i32, y: i32, ctx: &mut BTerm) {
         ctx.set(x, y, self.fg, self.bg, self.glyph);
-        // println!("{x}, {y}");
     } 
 }
