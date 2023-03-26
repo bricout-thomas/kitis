@@ -1,13 +1,14 @@
 use bracket_terminal::prelude::*;
+use bevy_ecs::prelude::*;
 
-struct State {
-    
+pub struct State {
+    pub world: World,
 }
 
 impl State {
     pub fn new() -> State {
         State {
-            
+            world: World::new(),
         }
     }
 }
