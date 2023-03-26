@@ -1,5 +1,9 @@
 use bracket_terminal::prelude::*;
 
+struct State {
+    
+}
+
 impl State {
     pub fn new() -> State {
         State {
