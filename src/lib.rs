@@ -6,6 +6,7 @@ pub use state::State;
 
 pub mod map;
 pub mod display;
+pub mod components;
 
 pub const SCREEN_HEIGHT: i32 = 80;
 pub const SCREEN_WIDTH: i32 = 80;

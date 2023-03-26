@@ -15,6 +15,7 @@ opt-level = 3
 bevy_ecs = "0.10.0"
 bevy_math = "0.10.0"
 bracket-color = "0.8.7"
+bracket-noise = "0.8.7"
 bracket-terminal = "0.8.7"
 rand = "0.8.5"
 
