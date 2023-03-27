@@ -2,22 +2,24 @@ use bevy_math::IVec2;
 use bracket_terminal::prelude::*;
 use bevy_ecs::prelude::*;
 
-use crate::{display::Camera, map::Map};
+use crate::{display::Camera, map::Map, debug::DebugMode};
 
 pub struct State {
     pub seed: u64,
     pub camera: Camera,
     pub world: World,
     pub map: Map,
+    pub debug_mode: DebugMode,
 }
 
 impl State {
-    pub fn new(seed: u64) -> State {
+    pub fn new(seed: u64, debug_mode: DebugMode) -> State {
         State {
             seed,
             camera: Camera::new(),
             world: World::new(),
             map: Map::new(seed), // todo: Generate map
+            debug_mode,
         }
     }
 }
@@ -37,6 +39,6 @@ impl GameState for State {
         }
 
         // display the world
-        self.camera.view(ctx, &mut self.map);
+        self.camera.view(ctx, &mut self.map, &self.debug_mode);
     }
 }

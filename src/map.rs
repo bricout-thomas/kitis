@@ -17,11 +17,11 @@ impl Map {
     pub fn new(seed: u64) -> Map { 
         let mut grass_color_gen = FastNoise::seeded(seed);
         grass_color_gen.set_frequency(0.05);
-        grass_color_gen.set_fractal_octaves(400);
-        grass_color_gen.set_noise_type(NoiseType::Value);
+        grass_color_gen.set_fractal_octaves(2);
+        grass_color_gen.set_noise_type(NoiseType::Simplex);
         Map {
             grass_color_gen,
-            chunks: Default::default(),
+            chunks: HashMap::with_capacity(200),
         }
     }
 }
@@ -45,7 +45,7 @@ impl Chunk {
         for x in 0..CHUNK_SIZE {
             for y in 0..CHUNK_SIZE {
                 tiles[y][x].render.bg = RGBA::from_f32(0., 
-                    grass_color_gen.get_noise((chunk_coord.x * CHUNK_SIZE as i32 + x as i32) as f32, (chunk_coord.y * CHUNK_SIZE as i32 + y as i32) as f32)
+                    grass_color_gen.get_noise((chunk_coord.x * CHUNK_SIZE as i32 + x as i32) as f32, (chunk_coord.y * CHUNK_SIZE as i32 + y as i32) as f32) / 3. + 0.7
                     , 0., 1.);
             }
         }
