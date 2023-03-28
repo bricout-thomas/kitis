@@ -52,33 +52,43 @@ impl Camera {
         }
     }
 
-    pub fn view(&self, ctx: &mut BTerm, map: &mut Map, debug_mode: &DebugMode) {
+    pub fn view(&self, ctx: &mut BTerm, map: &mut Map, debug_mode: &DebugMode, camera_position_changed: bool) {
+        // set offset doesn't seem to work, but it is probably doing as intended
+        // the documentation is unclear. instead I use - self.position
+        // ctx.set_offset(self.position.x as f32, self.position.y as f32);
         for chunk_coord in IterOverChunks::from(self) {
             // get access to the chunk or create it
             // creation to be handled somewhere else
-            let chunk = match map.chunks.get(&chunk_coord) {
+            let chunk = match map.chunks.get_mut(&chunk_coord) {
                 Some(chunk) => { chunk }
                 None => {
                     let new_chunk = Chunk::grass(&map.grass_color_gen, chunk_coord);
                     map.chunks.insert(chunk_coord, new_chunk);
-                    map.chunks.get(&chunk_coord).unwrap()
+                    map.chunks.get_mut(&chunk_coord).unwrap()
                 }
             };
 
             // display tiles
-            let proj_chunk_coord = chunk_coord * CHUNK_SIZE as i32 - self.position;
-            for (loc_y, line) in chunk.tiles.iter().enumerate() {
-                for (loc_x, tile) in line.iter().enumerate() {
-                    let proj_x = proj_chunk_coord.x + loc_x as i32;
-                    let proj_y = proj_chunk_coord.y + loc_y as i32;
-                    if proj_x < 0 || proj_y < 0 { continue; } // avoids crash from calling into::<usize> on neg value
-                    tile.render.render(proj_x, proj_y, ctx);
-                    if debug_mode.display_chunk {
-                        ctx.print(proj_chunk_coord.x, proj_chunk_coord.y, format!("X: {}, Y: {}", chunk_coord.x, chunk_coord.y));
+            if camera_position_changed || chunk.updated_tiles {
+                chunk.updated_tiles = false;
+                let proj_chunk_coord = chunk_coord * CHUNK_SIZE as i32 - self.position;
+                for (loc_y, line) in chunk.tiles.iter().enumerate() {
+                    for (loc_x, tile) in line.iter().enumerate() {
+                        let proj_x = proj_chunk_coord.x + loc_x as i32;
+                        let proj_y = proj_chunk_coord.y + loc_y as i32;
+                        if proj_x < 0 || proj_y < 0 { continue; } // avoids crash from calling into::<usize> on neg value
+                        tile.render.render(proj_x, proj_y, ctx);
+                        if debug_mode.display_chunk {
+                            ctx.print(proj_chunk_coord.x, proj_chunk_coord.y, format!("X: {}, Y: {}", chunk_coord.x, chunk_coord.y));
+                        }
                     }
                 }
             }
 
+            // display entities
+            for entity in chunk.entities.iter() {
+
+            }
         }
     }
 }

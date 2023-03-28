@@ -1,13 +1,11 @@
 use std::{collections::HashMap};
 
-use bevy_ecs::prelude::*;
 use bevy_math::IVec2;
 use bracket_color::rgba::RGBA;
 use bracket_noise::prelude::{FastNoise, NoiseType};
 
-use crate::{CHUNK_SIZE, components::TileRenderable};
+use crate::{CHUNK_SIZE, components::TileRenderable, entities::Entity};
 
-#[derive(Resource)]
 pub struct Map {
     pub chunks: HashMap<IVec2, Chunk>,
     pub grass_color_gen: FastNoise,
@@ -27,6 +25,7 @@ impl Map {
 }
 
 pub struct Chunk {
+    pub updated_tiles: bool,
     pub tiles: [[Tile; CHUNK_SIZE]; CHUNK_SIZE],
     pub entities: Vec<Entity>,
 }
@@ -35,6 +34,7 @@ impl Chunk {
     // A completely void of anything chunk
     pub fn empty() -> Chunk {
         Chunk {
+            updated_tiles: true,
             tiles: [[Tile::default(); CHUNK_SIZE]; CHUNK_SIZE],
             entities: Vec::new(),
         }
@@ -51,6 +51,7 @@ impl Chunk {
         }
 
         Chunk {
+            updated_tiles: true,
             tiles,
             entities: Vec::new(),
         }

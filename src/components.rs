@@ -1,13 +1,11 @@
-use bevy_ecs::prelude::*;
 use bevy_math::*;
 use bracket_terminal::prelude::*;
 
-#[derive(Component)]
 pub struct Position {
     coord: Vec2,
 }
 
-#[derive(Component, Default, Copy, Clone)]
+#[derive(Default, Copy, Clone)]
 pub struct TileRenderable {
     glyph: FontCharType,
     pub bg: RGBA,
