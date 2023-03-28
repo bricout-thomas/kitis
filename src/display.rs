@@ -3,7 +3,7 @@ use std::borrow::Borrow;
 use bevy_math::prelude::*;
 use bracket_terminal::prelude::*;
 
-use crate::{SCREEN_HEIGHT, SCREEN_WIDTH, CHUNK_SIZE, map::{Map, Chunk}, debug::DebugMode};
+use crate::{SCREEN_HEIGHT, SCREEN_WIDTH, CHUNK_SIZE, map::{Map, Chunk}, debug::DebugMode, entities::Entity};
 
 // Camera should be placed directly above target
 pub struct Camera {
@@ -88,8 +88,10 @@ impl Camera {
                     }
                 }
             }
+        }
 
-            }
+        // will be filled with every entity that has moved enough to change chunk
+        let to_move_chunk = Vec::<(Box<dyn Entity>, IVec2)>::new();
         
         for chunk_coord in IterOverChunks::from(self) {
             // get access to the chunk or create it
@@ -100,11 +102,19 @@ impl Camera {
             };
 
             // display entities
+            let mut to_swap_position = Vec::new();
             let camera_position = Vec2::new(self.position.x as f32, self.position.y as f32);
-            for entity in chunk.entities.iter_mut() {
-                entity.everything_solo();
+            for (id, entity) in chunk.entities.iter_mut().enumerate() {
+                // everything_solo is not pure!
+                if let Some(new_chunk) = entity.everything_solo() {
+                    to_swap_position.push(
+                        (new_chunk, id)
+                    );
+                }
                 entity.display(ctx, camera_position);
             }
+            // remove entities from high index to low to avoid changing the index of other to_remove entities
+            // to_swap_position
         }
     }
 }
