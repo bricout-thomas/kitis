@@ -1,3 +1,5 @@
+use std::borrow::Borrow;
+
 use bevy_math::prelude::*;
 use bracket_terminal::prelude::*;
 
@@ -56,6 +58,8 @@ impl Camera {
         // set offset doesn't seem to work, but it is probably doing as intended
         // the documentation is unclear. instead I use - self.position
         // ctx.set_offset(self.position.x as f32, self.position.y as f32);
+
+        // you have to iterate twice over the chunks, once per layer to avoid cropped entity animations
         for chunk_coord in IterOverChunks::from(self) {
             // get access to the chunk or create it
             // creation to be handled somewhere else
@@ -85,9 +89,20 @@ impl Camera {
                 }
             }
 
-            // display entities
-            for entity in chunk.entities.iter() {
+            }
+        
+        for chunk_coord in IterOverChunks::from(self) {
+            // get access to the chunk or create it
+            // creation to be handled somewhere else
+            let chunk = match map.chunks.get_mut(&chunk_coord) {
+                Some(chunk) => { chunk }
+                None => { unreachable!() } // has been generated in the former loop
+            };
 
+            // display entities
+            let camera_position = Vec2::new(self.position.x as f32, self.position.y as f32);
+            for entity in chunk.entities.iter_mut() {
+                entity.display(ctx, camera_position);
             }
         }
     }

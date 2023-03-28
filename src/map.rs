@@ -1,10 +1,11 @@
 use std::{collections::HashMap};
 
-use bevy_math::IVec2;
+use bevy_math::{IVec2, Vec2};
 use bracket_color::rgba::RGBA;
 use bracket_noise::prelude::{FastNoise, NoiseType};
+use rand::random;
 
-use crate::{CHUNK_SIZE, components::TileRenderable, entities::Entity};
+use crate::{CHUNK_SIZE, components::TileRenderable, entities::{Entity, self}, animations::Drone};
 
 pub struct Map {
     pub chunks: HashMap<IVec2, Chunk>,
@@ -27,7 +28,7 @@ impl Map {
 pub struct Chunk {
     pub updated_tiles: bool,
     pub tiles: [[Tile; CHUNK_SIZE]; CHUNK_SIZE],
-    pub entities: Vec<Entity>,
+    pub entities: Vec<Box<dyn Entity>>,
 }
 
 impl Chunk {
@@ -50,10 +51,18 @@ impl Chunk {
             }
         }
 
+        let mut entities: Vec<Box<dyn Entity>> = Vec::new();
+
+        if rand::random::<u8>() >= 128 {
+            entities.push(
+                Drone::new(random_Vec2_inside_chunk(chunk_coord))
+            );
+        } 
+
         Chunk {
             updated_tiles: true,
             tiles,
-            entities: Vec::new(),
+            entities,
         }
     }
 }
@@ -61,4 +70,12 @@ impl Chunk {
 #[derive(Default, Copy, Clone)]
 pub struct Tile {
     pub render: TileRenderable,
+}
+
+fn random_Vec2_inside_chunk(chunk_coord: IVec2) -> Vec2 {
+    let topleft: IVec2 = chunk_coord * CHUNK_SIZE as i32;
+    let topleft: Vec2 = Vec2::new(topleft.x as f32, topleft.y as f32);
+    let random_small_vec = Vec2::new(random::<f32>() * CHUNK_SIZE as f32, random::<f32>() * CHUNK_SIZE as f32);
+    // println!("random_small_vec = {:?}", random_small_vec);
+    topleft + random_small_vec
 }

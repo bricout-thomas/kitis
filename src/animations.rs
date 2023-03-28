@@ -1,17 +1,26 @@
-use bevy_math::IVec2;
+use bevy_math::{Vec2};
 use bracket_terminal::prelude::*;
+use rand::random;
 
-trait AnimatedLoop {
-    fn display(&mut self, proj_coord: IVec2, ctx: &mut BTerm);
+use crate::entities::Entity;
+
+pub struct Drone { animation_step: u8, position: Vec2 }
+
+impl Drone {
+    pub fn new(position: Vec2) -> Box<dyn Entity> {
+        Box::new(Self {
+            position,
+            animation_step: random(),
+        })
+    }
 }
 
-struct AnimateDrone { step: u8 }
-
-impl AnimatedLoop for AnimateDrone {
-    fn display(&mut self, proj_coord: IVec2, ctx: &mut BTerm) {
-        let (x, y) = proj_coord.try_into().unwrap();
-        self.step = self.step.wrapping_add(2);
-        let palm_char = match self.step {
+impl Entity for Drone {
+    fn display(&mut self, ctx: &mut BTerm, camera_position: Vec2) {
+        let (x, y) = (self.position - camera_position).try_into().unwrap();
+        let x = x as i32; let y = y as i32;
+        self.animation_step = self.animation_step.wrapping_add(16);
+        let palm_char = match self.animation_step {
             0..=63 => '-',
             64..=127 => '\\',
             128..=161 => '|',
@@ -22,5 +31,8 @@ impl AnimatedLoop for AnimateDrone {
         ctx.print(x+1, y-1, palm_char);
         ctx.print(x+1, y+1, palm_char);
         ctx.print(x-1, y+1, palm_char);
+    }
+    fn everything_else(&mut self) -> Option<bevy_math::IVec2> {
+        None
     }
 }
