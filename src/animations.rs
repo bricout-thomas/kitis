@@ -32,7 +32,7 @@ impl Entity for Drone {
         ctx.print(x+1, y+1, palm_char);
         ctx.print(x-1, y+1, palm_char);
     }
-    fn everything_else(&mut self) -> Option<bevy_math::IVec2> {
+    fn everything_solo(&mut self) -> Option<bevy_math::IVec2> {
         None
     }
 }

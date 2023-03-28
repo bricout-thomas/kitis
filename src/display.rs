@@ -102,6 +102,7 @@ impl Camera {
             // display entities
             let camera_position = Vec2::new(self.position.x as f32, self.position.y as f32);
             for entity in chunk.entities.iter_mut() {
+                entity.everything_solo();
                 entity.display(ctx, camera_position);
             }
         }

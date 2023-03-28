@@ -3,6 +3,7 @@ use bracket_terminal::prelude::BTerm;
 
 pub trait Entity {
     fn display(&mut self, ctx: &mut BTerm, camera_position: Vec2);
-    fn everything_else(&mut self) -> Option<IVec2>;
+    fn everything_solo(&mut self) -> Option<IVec2>;
     // return the new chunk_coord if the entity moved so that it can be moved
+    // doesn't require any outside world info
 }
