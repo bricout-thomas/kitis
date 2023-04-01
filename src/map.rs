@@ -82,6 +82,7 @@ pub struct Tile {
     pub render: TileRenderable,
 }
 
+#[allow(non_snake_case)]
 fn random_Vec2_inside_chunk(chunk_coord: IVec2) -> Vec2 {
     let topleft: IVec2 = chunk_coord * CHUNK_SIZE as i32;
     let topleft: Vec2 = Vec2::new(topleft.x as f32, topleft.y as f32);

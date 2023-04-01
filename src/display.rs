@@ -75,8 +75,6 @@ impl Camera {
 
         // you have to iterate twice over the chunks, once per layer to avoid cropped entity animations
         for chunk_coord in IterOverChunks::from(self) {
-            // get access to the chunk or create it
-            // creation to be handled somewhere else
             let chunk = match map.chunks.get_mut(&chunk_coord) {
                 Some(chunk) => { chunk }
                 None => { unreachable!();
@@ -100,9 +98,6 @@ impl Camera {
                 }
                 if debug_mode.display_chunk {
                     ctx.print(proj_chunk_coord.x, proj_chunk_coord.y, format!("X: {}, Y: {}", chunk_coord.x, chunk_coord.y));
-                }
-                // unsee entities
-                for entity in chunk.entities.iter() {
                 }
             }
         }

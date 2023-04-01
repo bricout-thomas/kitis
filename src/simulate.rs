@@ -1,4 +1,6 @@
 use std::collections::HashSet;
+use bevy_math::IVec2;
+
 use crate::{map::{Map, Chunk}, display::{Camera, IterOverChunks}, entities::{EntityStatus, EntityRef}};
 
 
@@ -24,28 +26,42 @@ pub fn run_simulation_step(map: &mut Map, camera: &Camera, sim_distance: i32, si
         }
     }
 
+    let mut spatial_updates = Vec::<SpatialPartitioningUpdate>::new();
     // update every entity
+
     for chunk_coord in IterOverChunks::loaded_chunks(camera, sim_distance) {
         let chunk = match map.chunks.get_mut(&chunk_coord) {
             Some(chunk) => { chunk }
             None => { unreachable!() }
         };
         
-        for entity in chunk.entities.iter() {
-            let mut entity = entity.access_wrapper();
+        for entity_ref in chunk.entities.iter() {
+            let mut entity = entity_ref.access_wrapper();
             if entity.last_updated < sim_step {
                 let status = entity.entity.everything_solo();
                 entity.last_updated = sim_step;
 
                 match status {
                     EntityStatus::Nothing => {},
-                    EntityStatus::Delete  => { entity.kill() },
                     EntityStatus::RedrawBg => { chunk.updated_tiles = true; },
-                    EntityStatus::UpdateSpatialPartitioning { remove_from_chunks, add_to_chunks }
-                        => { todo!() },
-                    _ => { todo!() }
+                    EntityStatus::UpdateSpatialPartitioning { remove_from, add_to }
+                        => { spatial_updates.push( SpatialPartitioningUpdate { 
+                            entity: entity_ref.clone(),
+                            remove_from, 
+                            add_to,
+                        }) },
                 }
             }
         }
     }
+
+    for spatial_update in spatial_updates {
+        
+    }
+}
+
+struct SpatialPartitioningUpdate {
+    entity: EntityRef,
+    remove_from: Vec<IVec2>,
+    add_to: Vec<IVec2>,
 }

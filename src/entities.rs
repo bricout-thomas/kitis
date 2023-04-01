@@ -23,9 +23,6 @@ pub struct EntityWrapper {
 }
 
 impl EntityWrapper {
-    pub fn kill(&mut self) {
-        self.chunks.clear();
-    }
     pub fn new_drone(position: Vec2, sim_step: u64) -> EntityWrapper {
         let mut chunks = HashSet::with_capacity(1);
         chunks.insert(map_position_to_chunk(position));
@@ -47,11 +44,10 @@ impl EntityWrapper {
 
 pub enum EntityStatus {
     Nothing,
-    Delete,
     RedrawBg,
     UpdateSpatialPartitioning {
-        remove_from_chunks: Vec<IVec2>,
-        add_to_chunks: Vec<IVec2>,
+        remove_from: Vec<IVec2>,
+        add_to: Vec<IVec2>,
     },
 }
 
