@@ -13,6 +13,7 @@ pub mod debug;
 pub mod drone;
 pub mod entities;
 pub mod simulate;
+pub mod utils;
 
 pub const SCREEN_HEIGHT: i32 = 80;
 pub const SCREEN_WIDTH: i32 = 80;

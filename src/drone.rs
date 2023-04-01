@@ -2,11 +2,12 @@ use bevy_math::Vec2;
 use bracket_terminal::prelude::*;
 use rand::random;
 
-use crate::entities::{Entity, EntityStatus};
+use crate::{entities::{Entity, EntityStatus}, utils::chunk_location};
 
 pub struct Drone {
     animation_step: u8, 
-    position: Vec2 
+    position: Vec2,
+    velocity: Vec2,
 }
 
 impl Drone {
@@ -14,6 +15,7 @@ impl Drone {
         Box::new( Self {
             position,
             animation_step: random(),
+            velocity: Vec2::new(random::<f32>()-0.5, random::<f32>()-0.5)
         })
     }
 }
@@ -35,7 +37,18 @@ impl Entity for Drone {
         ctx.print(x+1, y+1, palm_char);
         ctx.print(x-1, y+1, palm_char);
     }
+
     fn everything_solo(&mut self) -> EntityStatus {
-        EntityStatus::Nothing
+        let former_location = chunk_location(self.position);
+        self.position += self.velocity;
+        let new_location = chunk_location(self.position);
+        if former_location != new_location {
+            EntityStatus::UpdateSpatialPartitioning { 
+                remove_from: vec!(former_location), 
+                add_to: vec!(new_location), 
+            }
+        } else {
+            EntityStatus::RedrawBg
+        }
     }
 }

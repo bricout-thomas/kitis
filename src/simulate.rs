@@ -59,7 +59,14 @@ pub fn run_simulation_step(map: &mut Map, camera: &Camera, sim_distance: i32, si
     for spatial_update in spatial_updates {
         let entity_ref = spatial_update.entity;
         for chunk_coord in spatial_update.add_to {
-            let chunk = map.chunks.get_mut(&chunk_coord).unwrap();
+            let chunk = match map.chunks.get_mut(&chunk_coord) {
+                Some(chunk) => { chunk }
+                None => { 
+                    let new_chunk = Chunk::grass(&map.grass_color_gen, chunk_coord, sim_step);
+                    map.chunks.insert(chunk_coord, new_chunk);
+                    map.chunks.get_mut(&chunk_coord).unwrap()
+                }
+            };
             chunk.entities.insert(entity_ref.clone());
         }
         for chunk_coord in spatial_update.remove_from {
