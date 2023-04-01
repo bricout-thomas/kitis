@@ -55,8 +55,17 @@ pub fn run_simulation_step(map: &mut Map, camera: &Camera, sim_distance: i32, si
         }
     }
 
+    // update the refernce to entities that moved out of or in chunks
     for spatial_update in spatial_updates {
-        
+        let entity_ref = spatial_update.entity;
+        for chunk_coord in spatial_update.add_to {
+            let chunk = map.chunks.get_mut(&chunk_coord).unwrap();
+            chunk.entities.insert(entity_ref.clone());
+        }
+        for chunk_coord in spatial_update.remove_from {
+            let chunk = map.chunks.get_mut(&chunk_coord).unwrap();
+            chunk.entities.remove(&entity_ref);
+        }
     }
 }
 

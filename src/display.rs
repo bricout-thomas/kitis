@@ -75,14 +75,7 @@ impl Camera {
 
         // you have to iterate twice over the chunks, once per layer to avoid cropped entity animations
         for chunk_coord in IterOverChunks::from(self) {
-            let chunk = match map.chunks.get_mut(&chunk_coord) {
-                Some(chunk) => { chunk }
-                None => { unreachable!();
-                    let new_chunk = Chunk::grass(&map.grass_color_gen, chunk_coord, sim_step);
-                    map.chunks.insert(chunk_coord, new_chunk);
-                    map.chunks.get_mut(&chunk_coord).unwrap()
-                }
-            };
+            let chunk = map.chunks.get_mut(&chunk_coord).unwrap();
 
             // display tiles
             if camera_position_changed || chunk.updated_tiles {
@@ -115,7 +108,7 @@ impl Camera {
 
             // display entities
             let camera_position = Vec2::new(self.position.x as f32, self.position.y as f32);
-            for entity in chunk.entities.iter_mut() {
+            for entity in chunk.entities.iter() {
                 let mut entity = entity.access_wrapper();
                 if entity.last_seen < sim_step {
                     entity.entity.display(ctx, camera_position);

@@ -5,7 +5,6 @@ use rand::random;
 use crate::entities::{Entity, EntityStatus};
 
 pub struct Drone {
-    seen: bool,
     animation_step: u8, 
     position: Vec2 
 }
@@ -13,7 +12,6 @@ pub struct Drone {
 impl Drone {
     pub fn new(position: Vec2) -> Box<dyn Entity> {
         Box::new( Self {
-            seen: false,
             position,
             animation_step: random(),
         })

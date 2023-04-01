@@ -1,4 +1,4 @@
-use std::collections::HashMap;
+use std::collections::{HashMap, HashSet};
 
 use bevy_math::{IVec2, Vec2};
 use bracket_color::rgba::RGBA;
@@ -24,12 +24,13 @@ impl Map {
         }
     }
 
-    // doesn't wprk cause of borrow checker
-    // pub fn access_chunk_mut<'a>(&'a mut self, chunk_coord: IVec2) -> &'a mut Chunk {
-    //     if let Some(chunk) = self.chunks.get_mut(&chunk_coord) {
-    //         return chunk;
+    // pub fn access_chunk_mut<'a>(&'a mut self, chunk_coord: IVec2, sim_step: u64) -> &'a mut Chunk {
+    //     match self.chunks.get_mut(&chunk_coord) {
+    //         Some(chunk) => { return chunk },
+    //         None => {
+    //         }
     //     }
-    //     let new_chunk = Chunk::grass(&self.grass_color_gen, chunk_coord);
+    //     let new_chunk = Chunk::grass(&self.grass_color_gen, chunk_coord, sim_step);
     //     self.chunks.insert(chunk_coord, new_chunk);
     //     self.chunks.get_mut(&chunk_coord).unwrap()
     // }
@@ -38,7 +39,7 @@ impl Map {
 pub struct Chunk {
     pub updated_tiles: bool,
     pub tiles: [[Tile; CHUNK_SIZE]; CHUNK_SIZE],
-    pub entities: Vec<EntityRef>,
+    pub entities: HashSet<EntityRef>,
 }
 
 impl Chunk {
@@ -47,7 +48,7 @@ impl Chunk {
         Chunk {
             updated_tiles: true,
             tiles: [[Tile::default(); CHUNK_SIZE]; CHUNK_SIZE],
-            entities: Vec::new(),
+            entities: HashSet::new(),
         }
     }
     // A chunk with grass colored thanks to noise
@@ -61,10 +62,10 @@ impl Chunk {
             }
         }
 
-        let mut entities: Vec<EntityRef> = Vec::new();
+        let mut entities: HashSet<EntityRef> = HashSet::new();
 
         if rand::random::<u8>() >= 128 {
-            entities.push(
+            entities.insert(
                 EntityRef::new(EntityWrapper::new_drone(random_Vec2_inside_chunk(chunk_coord), sim_step))
             );
         } 
