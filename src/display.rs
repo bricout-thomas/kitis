@@ -1,16 +1,14 @@
-use std::borrow::Borrow;
-
 use bevy_math::prelude::*;
 use bracket_terminal::prelude::*;
 
-use crate::{SCREEN_HEIGHT, SCREEN_WIDTH, CHUNK_SIZE, map::{Map, Chunk}, debug::DebugMode, entities::Entity};
+use crate::{SCREEN_HEIGHT, SCREEN_WIDTH, CHUNK_SIZE, map::{Map, Chunk}, debug::DebugMode};
 
 // Camera should be placed directly above target
 pub struct Camera {
     pub position: IVec2,
 }
 
-struct IterOverChunks {
+pub struct IterOverChunks {
     left_side: i32,
     current: IVec2,
     last: IVec2,
@@ -25,6 +23,22 @@ impl From<&Camera> for IterOverChunks {
 
         // println!("top left: {}, {}", left_side, top_side);
         // println!("bottom right: {}, {}", right_side, bottom_side);
+        
+        IterOverChunks {
+            left_side,
+            current: IVec2::new(left_side - 1, top_side),
+            last: IVec2::new(right_side, bottom_side),
+        }
+    }
+}
+
+impl IterOverChunks {
+    // in nb of chunks
+    pub fn loaded_chunks(camera: &Camera, sim_distance: i32) -> Self {
+        let top_side = camera.position.y / CHUNK_SIZE as i32 - sim_distance;
+        let left_side = camera.position.x / CHUNK_SIZE as i32 - sim_distance;
+        let bottom_side = camera.position.y / CHUNK_SIZE as i32 + sim_distance;
+        let right_side = camera.position.x / CHUNK_SIZE as i32 + sim_distance;
         
         IterOverChunks {
             left_side,
@@ -54,7 +68,7 @@ impl Camera {
         }
     }
 
-    pub fn view(&self, ctx: &mut BTerm, map: &mut Map, debug_mode: &DebugMode, camera_position_changed: bool) {
+    pub fn view(&self, ctx: &mut BTerm, map: &mut Map, debug_mode: &DebugMode, camera_position_changed: bool, sim_step: u64) {
         // set offset doesn't seem to work, but it is probably doing as intended
         // the documentation is unclear. instead I use - self.position
         // ctx.set_offset(self.position.x as f32, self.position.y as f32);
@@ -65,8 +79,8 @@ impl Camera {
             // creation to be handled somewhere else
             let chunk = match map.chunks.get_mut(&chunk_coord) {
                 Some(chunk) => { chunk }
-                None => {
-                    let new_chunk = Chunk::grass(&map.grass_color_gen, chunk_coord);
+                None => { unreachable!();
+                    let new_chunk = Chunk::grass(&map.grass_color_gen, chunk_coord, sim_step);
                     map.chunks.insert(chunk_coord, new_chunk);
                     map.chunks.get_mut(&chunk_coord).unwrap()
                 }
@@ -82,16 +96,19 @@ impl Camera {
                         let proj_y = proj_chunk_coord.y + loc_y as i32;
                         if proj_x < 0 || proj_y < 0 { continue; } // avoids crash from calling into::<usize> on neg value
                         tile.render.render(proj_x, proj_y, ctx);
-                        if debug_mode.display_chunk {
-                            ctx.print(proj_chunk_coord.x, proj_chunk_coord.y, format!("X: {}, Y: {}", chunk_coord.x, chunk_coord.y));
-                        }
                     }
+                }
+                if debug_mode.display_chunk {
+                    ctx.print(proj_chunk_coord.x, proj_chunk_coord.y, format!("X: {}, Y: {}", chunk_coord.x, chunk_coord.y));
+                }
+                // unsee entities
+                for entity in chunk.entities.iter() {
                 }
             }
         }
 
         // will be filled with every entity that has moved enough to change chunk
-        let to_move_chunk = Vec::<(Box<dyn Entity>, IVec2)>::new();
+        // let to_move_chunk = Vec::<(Box<dyn Entity>, IVec2)>::new();
         
         for chunk_coord in IterOverChunks::from(self) {
             // get access to the chunk or create it
@@ -102,19 +119,14 @@ impl Camera {
             };
 
             // display entities
-            let mut to_swap_position = Vec::new();
             let camera_position = Vec2::new(self.position.x as f32, self.position.y as f32);
-            for (id, entity) in chunk.entities.iter_mut().enumerate() {
-                // everything_solo is not pure!
-                if let Some(new_chunk) = entity.everything_solo() {
-                    to_swap_position.push(
-                        (new_chunk, id)
-                    );
+            for entity in chunk.entities.iter_mut() {
+                let mut entity = entity.access_wrapper();
+                if entity.last_seen < sim_step {
+                    entity.entity.display(ctx, camera_position);
+                    entity.last_seen = sim_step;
                 }
-                entity.display(ctx, camera_position);
             }
-            // remove entities from high index to low to avoid changing the index of other to_remove entities
-            // to_swap_position
         }
     }
 }

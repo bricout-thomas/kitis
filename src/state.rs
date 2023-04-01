@@ -1,22 +1,26 @@
 use bevy_math::IVec2;
 use bracket_terminal::prelude::*;
 
-use crate::{display::Camera, map::Map, debug::DebugMode};
+use crate::{display::Camera, map::Map, debug::DebugMode, simulate::run_simulation_step};
 
 pub struct State {
     pub seed: u64,
     pub camera: Camera,
     pub map: Map,
     pub debug_mode: DebugMode,
+    pub sim_distance: i32,
+    pub sim_step: u64,
 }
 
 impl State {
-    pub fn new(seed: u64, debug_mode: DebugMode) -> State {
+    pub fn new(seed: u64, debug_mode: DebugMode, sim_distance: i32) -> State {
         State {
             seed,
             camera: Camera::new(),
             map: Map::new(seed), // todo: Generate map
             debug_mode,
+            sim_distance,
+            sim_step: 1,
         }
     }
 }
@@ -35,8 +39,12 @@ impl GameState for State {
                 _ =>                        { camera_position_changed = false; IVec2::ZERO},
             }
         }
+        // update sim_step
+        self.sim_step += 1;
 
+        // run the simulation
+        run_simulation_step(&mut self.map, &self.camera, self.sim_distance, self.sim_step);
         // display the world
-        self.camera.view(ctx, &mut self.map, &self.debug_mode, camera_position_changed);
+        self.camera.view(ctx, &mut self.map, &self.debug_mode, camera_position_changed, self.sim_step);
     }
 }
